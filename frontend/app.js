@@ -1,43 +1,74 @@
+// Load and render teachers
 async function loadTeachers() {
   const res = await fetch('/api/teachers');
   const teachers = await res.json();
   const container = document.getElementById('teachers');
   container.innerHTML = '';
+
   teachers.forEach(t => {
     const div = document.createElement('div');
+    // Card UI with stars (codex)
+    div.className = 'bg-white rounded-lg shadow p-6';
+    const ratingHtml = t.averageRating !== null
+      ? `<div class="flex items-center mb-4"><div class="flex space-x-1">${renderStars(t.averageRating)}</div><span class="ml-2 text-sm text-gray-600">${t.averageRating.toFixed(2)}</span></div>`
+      : '<p class="text-gray-500 mb-4">No ratings yet</p>';
+
+    // Clickable star controls (codex)
     div.innerHTML = `
-      <h3>${t.name}</h3>
-      <p>Average rating: ${t.averageRating !== null ? t.averageRating.toFixed(2) : 'No ratings yet'}</p>
-      <input placeholder="Rate 1-5" id="rate-${t.id}" />
-      <button onclick="rateTeacher(${t.id})">Rate</button>
+      <h3 class="text-xl font-semibold mb-2">${t.name}</h3>
+      ${ratingHtml}
+      <div class="flex space-x-1">${renderRateControls(t.id)}</div>
     `;
     container.appendChild(div);
   });
 }
 
+// Helpers from codex variant
+function renderStars(rating) {
+  const full = Math.round(rating);
+  let stars = '';
+  for (let i = 1; i <= 5; i++) {
+    stars += `<i class="${i <= full ? 'fa-solid text-yellow-400' : 'fa-regular text-gray-300'} fa-star"></i>`;
+  }
+  return stars;
+}
+
+function renderRateControls(id) {
+  let controls = '';
+  for (let i = 1; i <= 5; i++) {
+    controls += `<i class="fa-solid fa-star text-gray-300 hover:text-yellow-400 cursor-pointer" onclick="rateTeacher(${id}, ${i})"></i>`;
+  }
+  return controls;
+}
+
+// Add a teacher
 async function addTeacher() {
-  const name = document.getElementById('teacher-name').value;
+  const nameEl = document.getElementById('teacher-name');
+  const name = nameEl ? nameEl.value.trim() : '';
   if (!name) return;
+
   await fetch('/api/teachers', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name })
   });
-  document.getElementById('teacher-name').value = '';
+
+  if (nameEl) nameEl.value = '';
   loadTeachers();
 }
 
-async function rateTeacher(id) {
-  const input = document.getElementById(`rate-${id}`);
-  const rating = Number(input.value);
-  if (!rating) return;
+// Rate via star click (codex signature)
+async function rateTeacher(id, rating) {
+  if (!rating || rating < 1 || rating > 5) return;
+
   await fetch(`/api/teachers/${id}/ratings`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ rating })
   });
-  input.value = '';
+
   loadTeachers();
 }
 
-loadTeachers();
+// Ensure DOM exists before first render (codex behavior)
+document.addEventListener('DOMContentLoaded', loadTeachers);
