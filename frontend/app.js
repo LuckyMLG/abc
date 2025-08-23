@@ -1,4 +1,4 @@
-async function loadTeachers() {
+const loadTeachers = async () => {
   const res = await fetch('/api/teachers');
   const teachers = await res.json();
   const container = document.getElementById('teachers');
@@ -16,26 +16,26 @@ async function loadTeachers() {
     `;
     container.appendChild(div);
   });
-}
+};
 
-function renderStars(rating) {
+const renderStars = rating => {
   const full = Math.round(rating);
   let stars = '';
   for (let i = 1; i <= 5; i++) {
     stars += `<i class="${i <= full ? 'fa-solid text-yellow-400' : 'fa-regular text-gray-300'} fa-star"></i>`;
   }
   return stars;
-}
+};
 
-function renderRateControls(id) {
+const renderRateControls = id => {
   let controls = '';
   for (let i = 1; i <= 5; i++) {
     controls += `<i class="fa-solid fa-star text-gray-300 hover:text-yellow-400 cursor-pointer" onclick="rateTeacher(${id}, ${i})"></i>`;
   }
   return controls;
-}
+};
 
-async function addTeacher() {
+const addTeacher = async () => {
   const name = document.getElementById('teacher-name').value;
   if (!name) return;
   await fetch('/api/teachers', {
@@ -45,9 +45,9 @@ async function addTeacher() {
   });
   document.getElementById('teacher-name').value = '';
   loadTeachers();
-}
+};
 
-async function rateTeacher(id, rating) {
+const rateTeacher = async (id, rating) => {
   if (!rating) return;
   await fetch(`/api/teachers/${id}/ratings`, {
     method: 'POST',
@@ -55,6 +55,7 @@ async function rateTeacher(id, rating) {
     body: JSON.stringify({ rating })
   });
   loadTeachers();
-}
+};
 
-loadTeachers();
+document.addEventListener('DOMContentLoaded', loadTeachers);
+
