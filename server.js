@@ -3,7 +3,26 @@ const path = require('path');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'frontend')));
+
+// Simple password protection for admin actions
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'classroom123';
+
+function requireAdmin(req, res, next) {
+  const auth = req.headers.authorization || '';
+  const [scheme, encoded] = auth.split(' ');
+  if (scheme !== 'Basic' || !encoded) {
+    res.set('WWW-Authenticate', 'Basic realm="Admin"');
+    return res.status(401).send('Authentication required.');
+  }
+
+  const [, password] = Buffer.from(encoded, 'base64').toString().split(':');
+  if (password !== ADMIN_PASSWORD) {
+    res.set('WWW-Authenticate', 'Basic realm="Admin"');
+    return res.status(401).send('Authentication required.');
+  }
+
+  next();
+}
 
 // Config & in-memory store
 const MAX_TEACHERS = 20;
@@ -29,7 +48,7 @@ app.get('/api/teachers', (req, res) => {
 });
 
 // Create a new teacher (admin flow enforces a simple cap)
-app.post('/api/teachers', (req, res) => {
+app.post('/api/teachers', requireAdmin, (req, res) => {
   if (teachers.length >= MAX_TEACHERS) {
     return res.status(400).json({ error: 'Teacher limit reached' });
   }
@@ -85,10 +104,16 @@ app.post('/api/teachers/:id/ratings', (req, res) => {
   res.status(201).json({ ...teacher, averageRating: averageFromReviews(teacher.reviews) });
 });
 
-// Admin page
-app.get('/admin', (req, res) => {
+// Admin page (protected)
+app.get('/admin', requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'admin.html'));
 });
+app.get('/admin.html', requireAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'admin.html'));
+});
+
+// Serve frontend assets
+app.use(express.static(path.join(__dirname, 'frontend')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
