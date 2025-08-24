@@ -3,47 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teacher Ratings</title>
-
-  <!-- Google Fonts -->
+  <title>Admin - TeacherRate</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-
-  <!-- TailwindCSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-
-  <!-- Font Awesome for star icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
-
-  <!-- Animations (optional) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-
   <style>
     body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
 <body class="bg-gray-50">
-  <!-- Header -->
   <header class="bg-white shadow">
     <div class="max-w-6xl mx-auto p-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-indigo-600">TeacherRate</h1>
-      <nav class="flex items-center gap-4">
+      <h1 class="text-2xl font-bold text-indigo-600">TeacherRate Admin</h1>
+      <nav>
         <a href="/" class="text-sm text-gray-600 hover:text-indigo-600">Home</a>
-        <a href="/admin" class="text-sm text-gray-600 hover:text-indigo-600">Admin</a>
       </nav>
     </div>
   </header>
 
-  <!-- Hero section -->
-  <section class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white py-20 text-center">
-    <h2 class="text-4xl font-bold mb-4">Share your classroom experiences</h2>
-    <p class="text-lg">Rate instructors and help students find the best teachers.</p>
-  </section>
-
-  <!-- Main content -->
-  <main class="max-w-4xl mx-auto p-6 -mt-12">
-    <!-- Add Teacher form -->
+  <main class="max-w-4xl mx-auto p-6">
     <section class="bg-white rounded-lg shadow p-6 mb-8">
       <h3 class="text-2xl font-semibold mb-4">Add Teacher</h3>
       <div class="flex flex-col sm:flex-row gap-2">
@@ -51,18 +31,7 @@
         <button class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition" onclick="addTeacher()">Add</button>
       </div>
     </section>
-
-    <!-- Teacher list -->
-    <section>
-      <h3 class="text-2xl font-semibold mb-4">Teachers</h3>
-      <div id="teachers" class="grid gap-6 sm:grid-cols-2"></div>
-    </section>
   </main>
-
-  <!-- Footer -->
-  <footer class="text-center p-4 text-sm text-gray-500">
-    &copy; 2024 Student Ratings
-  </footer>
 
   <script src="app.js"></script>
 </body>

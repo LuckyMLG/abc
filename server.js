@@ -5,52 +5,89 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'frontend')));
 
+// Config & in-memory store
+const MAX_TEACHERS = 20;
 const teachers = [];
 let nextId = 1;
 
-// List teachers with average rating
+// Helper to compute average from reviews
+function averageFromReviews(reviews) {
+  if (!reviews || reviews.length === 0) return null;
+  const sum = reviews.reduce((acc, r) => acc + Number(r.rating || 0), 0);
+  return sum / reviews.length;
+}
+
+// List teachers (summary)
 app.get('/api/teachers', (req, res) => {
   const summary = teachers.map(t => ({
     id: t.id,
     name: t.name,
-    averageRating: t.ratings.length ? t.ratings.reduce((a, b) => a + b, 0) / t.ratings.length : null
+    reviews: t.reviews, // included so frontend can render comments
+    averageRating: averageFromReviews(t.reviews)
   }));
   res.json(summary);
 });
 
-// Create a new teacher
+// Create a new teacher (admin flow enforces a simple cap)
 app.post('/api/teachers', (req, res) => {
-  const { name } = req.body;
-  if (!name) {
+  if (teachers.length >= MAX_TEACHERS) {
+    return res.status(400).json({ error: 'Teacher limit reached' });
+  }
+
+  const { name } = req.body || {};
+  if (!name || typeof name !== 'string' || !name.trim()) {
     return res.status(400).json({ error: 'Name is required' });
   }
-  const teacher = { id: nextId++, name, ratings: [] };
+
+  const teacher = { id: nextId++, name: name.trim(), reviews: [] };
   teachers.push(teacher);
   res.status(201).json(teacher);
 });
 
-// Get teacher details
+// Get teacher details (with computed average)
 app.get('/api/teachers/:id', (req, res) => {
   const teacher = teachers.find(t => t.id === Number(req.params.id));
-  if (!teacher) {
-    return res.status(404).json({ error: 'Teacher not found' });
-  }
-  const averageRating = teacher.ratings.length ? teacher.ratings.reduce((a, b) => a + b, 0) / teacher.ratings.length : null;
+  if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+
+  const averageRating = averageFromReviews(teacher.reviews);
   res.json({ ...teacher, averageRating });
 });
 
-// Submit a rating
-app.post('/api/teachers/:id/ratings', (req, res) => {
+// Submit a full review (rating + optional comment)
+app.post('/api/teachers/:id/reviews', (req, res) => {
   const teacher = teachers.find(t => t.id === Number(req.params.id));
-  if (!teacher) {
-    return res.status(404).json({ error: 'Teacher not found' });
-  }
-  const { rating } = req.body;
+  if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+
+  const { rating, comment } = req.body || {};
   if (typeof rating !== 'number' || rating < 1 || rating > 5) {
     return res.status(400).json({ error: 'Rating must be a number between 1 and 5' });
   }
-  teacher.ratings.push(rating);
-  res.status(201).json(teacher);
+
+  teacher.reviews.push({
+    rating,
+    comment: typeof comment === 'string' ? comment.trim() : ''
+  });
+
+  res.status(201).json({ ...teacher, averageRating: averageFromReviews(teacher.reviews) });
+});
+
+// Quick star-only rating (no comment)
+app.post('/api/teachers/:id/ratings', (req, res) => {
+  const teacher = teachers.find(t => t.id === Number(req.params.id));
+  if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+
+  const { rating } = req.body || {};
+  if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: 'Rating must be a number between 1 and 5' });
+  }
+
+  teacher.reviews.push({ rating, comment: '' });
+  res.status(201).json({ ...teacher, averageRating: averageFromReviews(teacher.reviews) });
+});
+
+// Admin page
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'admin.html'));
 });
 
 const PORT = process.env.PORT || 3000;
