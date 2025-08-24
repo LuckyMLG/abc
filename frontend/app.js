@@ -40,7 +40,7 @@ async function loadTeachers() {
 
   teachers.forEach(t => {
     const div = document.createElement('div');
-    div.className = 'bg-white rounded-lg shadow p-6 transition transform hover:-translate-y-1 hover:shadow-lg animate__animated animate__fadeIn';
+    div.className = 'bg-white border border-gray-200 rounded-lg shadow p-6 transition transform hover:-translate-y-1 hover:shadow-lg animate__animated animate__fadeIn';
 
     const ratingHtml = t.averageRating !== null && t.averageRating !== undefined
       ? `<div class="flex items-center mb-4">
@@ -59,12 +59,12 @@ async function loadTeachers() {
 
     // Build card: title, average rating, quick stars, and comment form
     div.innerHTML = `
-      <h3 class="text-xl font-semibold mb-2">${t.name}</h3>
+      <h3 class="text-xl font-semibold mb-2 text-blue-700">${t.name}</h3>
       ${ratingHtml}
 
       <!-- Quick star rating -->
       <div class="flex items-center space-x-2 mb-4">
-        <span class="text-sm text-gray-600">Rate:</span>
+        <span class="text-sm text-blue-700">Rate:</span>
         <div class="flex space-x-1">${renderRateControls(t.id)}</div>
       </div>
 
@@ -76,7 +76,7 @@ async function loadTeachers() {
             <option value="">Rating</option>
             ${[1,2,3,4,5].map(n => `<option value="${n}">${n}</option>`).join('')}
           </select>
-          <button class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition" onclick="submitReview(${t.id})">Submit</button>
+          <button class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition" onclick="submitReview(${t.id})">Submit</button>
         </div>
       </div>
 
