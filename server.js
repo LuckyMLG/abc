@@ -1,121 +1,177 @@
 const express = require('express');
 const path = require('path');
+const crypto = require('crypto');
 
 const app = express();
 app.use(express.json());
 
-// Simple password protection for admin actions
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'classroom123';
+// ---- In-memory data stores ---- //
+const businesses = [];
+let nextBusinessId = 1;
 
-function requireAdmin(req, res, next) {
-  const auth = req.headers.authorization || '';
-  const [scheme, encoded] = auth.split(' ');
-  if (scheme !== 'Basic' || !encoded) {
-    res.set('WWW-Authenticate', 'Basic realm="Admin"');
-    return res.status(401).send('Authentication required.');
-  }
+// Sample businesses for demo purposes
+businesses.push(
+  { id: nextBusinessId++, name: 'Coffee Spot', category: 'Cafe', location: 'New York', website: '', logo: '', reviews: [] },
+  { id: nextBusinessId++, name: 'Tech Guru', category: 'Electronics', location: 'San Francisco', website: '', logo: '', reviews: [] }
+);
 
-  const [, password] = Buffer.from(encoded, 'base64').toString().split(':');
-  if (password !== ADMIN_PASSWORD) {
-    res.set('WWW-Authenticate', 'Basic realm="Admin"');
-    return res.status(401).send('Authentication required.');
-  }
+const users = [];
+let nextUserId = 1;
 
-  next();
-}
+// token -> userId
+const sessions = new Map();
 
-// Config & in-memory store
-const MAX_TEACHERS = 20;
-const teachers = [];
-let nextId = 1;
-
-// Helper to compute average from reviews
+// ---- Helpers ---- //
 function averageFromReviews(reviews) {
   if (!reviews || reviews.length === 0) return null;
   const sum = reviews.reduce((acc, r) => acc + Number(r.rating || 0), 0);
   return sum / reviews.length;
 }
 
-// List teachers (summary)
-app.get('/api/teachers', (req, res) => {
-  const summary = teachers.map(t => ({
-    id: t.id,
-    name: t.name,
-    reviews: t.reviews, // included so frontend can render comments
-    averageRating: averageFromReviews(t.reviews)
-  }));
-  res.json(summary);
+function requireAuth(req, res, next) {
+  const auth = req.headers.authorization || '';
+  const [scheme, token] = auth.split(' ');
+  if (scheme === 'Bearer' && token && sessions.has(token)) {
+    req.userId = sessions.get(token);
+    return next();
+  }
+  return res.status(401).json({ error: 'Unauthorized' });
+}
+
+// ---- Auth Routes ---- //
+app.post('/api/signup', (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password required' });
+  }
+  if (users.some(u => u.email === email)) {
+    return res.status(400).json({ error: 'Email already in use' });
+  }
+  const user = { id: nextUserId++, email, password };
+  users.push(user);
+  res.status(201).json({ message: 'Signup successful' });
 });
 
-// Create a new teacher (admin flow enforces a simple cap)
-app.post('/api/teachers', requireAdmin, (req, res) => {
-  if (teachers.length >= MAX_TEACHERS) {
-    return res.status(400).json({ error: 'Teacher limit reached' });
+app.post('/api/login', (req, res) => {
+  const { email, password } = req.body || {};
+  const user = users.find(u => u.email === email && u.password === password);
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid credentials' });
   }
-
-  const { name } = req.body || {};
-  if (!name || typeof name !== 'string' || !name.trim()) {
-    return res.status(400).json({ error: 'Name is required' });
-  }
-
-  const teacher = { id: nextId++, name: name.trim(), reviews: [] };
-  teachers.push(teacher);
-  res.status(201).json(teacher);
+  const token = crypto.randomBytes(16).toString('hex');
+  sessions.set(token, user.id);
+  res.json({ token });
 });
 
-// Get teacher details (with computed average)
-app.get('/api/teachers/:id', (req, res) => {
-  const teacher = teachers.find(t => t.id === Number(req.params.id));
-  if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
-
-  const averageRating = averageFromReviews(teacher.reviews);
-  res.json({ ...teacher, averageRating });
-});
-
-// Submit a full review (rating + optional comment)
-app.post('/api/teachers/:id/reviews', (req, res) => {
-  const teacher = teachers.find(t => t.id === Number(req.params.id));
-  if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
-
-  const { rating, comment } = req.body || {};
-  if (typeof rating !== 'number' || rating < 1 || rating > 5) {
-    return res.status(400).json({ error: 'Rating must be a number between 1 and 5' });
-  }
-
-  teacher.reviews.push({
-    rating,
-    comment: typeof comment === 'string' ? comment.trim() : ''
+app.get('/api/my-reviews', requireAuth, (req, res) => {
+  const mine = [];
+  businesses.forEach(b => {
+    b.reviews
+      .filter(r => r.userId === req.userId)
+      .forEach(r => {
+        mine.push({
+          businessId: b.id,
+          businessName: b.name,
+          rating: r.rating,
+          text: r.text,
+          timestamp: r.timestamp
+        });
+      });
   });
-
-  res.status(201).json({ ...teacher, averageRating: averageFromReviews(teacher.reviews) });
+  res.json(mine);
 });
 
-// Quick star-only rating (no comment)
-app.post('/api/teachers/:id/ratings', (req, res) => {
-  const teacher = teachers.find(t => t.id === Number(req.params.id));
-  if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+// ---- Business Routes ---- //
+app.get('/api/businesses', (req, res) => {
+  const { search = '', category = '', location = '', page = 1, limit = 10 } = req.query;
 
-  const { rating } = req.body || {};
+  let results = businesses.filter(b =>
+    b.name.toLowerCase().includes(search.toLowerCase()) &&
+    (!category || b.category.toLowerCase().includes(category.toLowerCase())) &&
+    (!location || b.location.toLowerCase().includes(location.toLowerCase()))
+  );
+
+  const start = (Number(page) - 1) * Number(limit);
+  const paged = results.slice(start, start + Number(limit));
+
+  const formatted = paged.map(b => ({
+    id: b.id,
+    name: b.name,
+    category: b.category,
+    location: b.location,
+    averageRating: averageFromReviews(b.reviews),
+    reviewCount: b.reviews.length,
+    logo: b.logo || null
+  }));
+
+  res.json({ results: formatted, total: results.length });
+});
+
+app.get('/api/businesses/:id', (req, res) => {
+  const business = businesses.find(b => b.id === Number(req.params.id));
+  if (!business) return res.status(404).json({ error: 'Business not found' });
+  const reviews = business.reviews.map(r => {
+    const user = users.find(u => u.id === r.userId);
+    const reviewer = user ? user.email.split('@')[0] : 'Anonymous';
+    return { rating: r.rating, text: r.text, timestamp: r.timestamp, reviewer };
+  });
+  res.json({
+    id: business.id,
+    name: business.name,
+    category: business.category,
+    location: business.location,
+    website: business.website,
+    logo: business.logo,
+    reviews,
+    averageRating: averageFromReviews(business.reviews),
+    reviewCount: business.reviews.length
+  });
+});
+
+app.post('/api/businesses', (req, res) => {
+  const { name, category = '', location = '', website = '', logo = '' } = req.body || {};
+  if (!name) return res.status(400).json({ error: 'Name is required' });
+  const business = {
+    id: nextBusinessId++,
+    name: name.trim(),
+    category: category.trim(),
+    location: location.trim(),
+    website: website.trim(),
+    logo: logo.trim(),
+    reviews: []
+  };
+  businesses.push(business);
+  res.status(201).json(business);
+});
+
+app.post('/api/businesses/:id/reviews', requireAuth, (req, res) => {
+  const business = businesses.find(b => b.id === Number(req.params.id));
+  if (!business) return res.status(404).json({ error: 'Business not found' });
+
+  const { rating, text = '' } = req.body || {};
   if (typeof rating !== 'number' || rating < 1 || rating > 5) {
-    return res.status(400).json({ error: 'Rating must be a number between 1 and 5' });
+    return res.status(400).json({ error: 'Rating must be 1-5' });
   }
 
-  teacher.reviews.push({ rating, comment: '' });
-  res.status(201).json({ ...teacher, averageRating: averageFromReviews(teacher.reviews) });
+  const review = {
+    userId: req.userId,
+    rating,
+    text: String(text).trim(),
+    timestamp: new Date().toISOString()
+  };
+  business.reviews.push(review);
+  res.status(201).json({
+    ...business,
+    averageRating: averageFromReviews(business.reviews),
+    reviewCount: business.reviews.length
+  });
 });
 
-// Admin page (protected)
-app.get('/admin', requireAdmin, (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'admin.html'));
-});
-app.get('/admin.html', requireAdmin, (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'admin.html'));
-});
-
-// Serve frontend assets
+// ---- Static frontend ---- //
 app.use(express.static(path.join(__dirname, 'frontend')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
+

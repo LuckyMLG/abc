@@ -1,7 +1,7 @@
 {
-  "name": "teacher-rating-site",
+  "name": "bizrate",
   "version": "1.0.0",
-  "description": "Simple teacher rating site",
+  "description": "Simple business review site",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

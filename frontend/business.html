@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+</head>
+<body class="min-h-screen flex flex-col">
+  <header class="bg-white shadow">
+    <div class="max-w-5xl mx-auto p-4 flex justify-between">
+      <a href="/" class="text-xl font-bold text-blue-600">BizRate</a>
+      <nav class="space-x-4 text-sm text-gray-600">
+        <a href="/" class="hover:text-blue-600">Home</a>
+        <a href="#" class="hover:text-blue-600">Categories</a>
+        <a href="/profile.html" class="hover:text-blue-600">Write a review</a>
+        <a href="/login.html" class="hover:text-blue-600">Login</a>
+        <a href="/signup.html" class="hover:text-blue-600">Signup</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-5xl mx-auto p-4">
+    <h2 id="biz-name" class="text-2xl font-bold mb-2"></h2>
+    <p id="biz-meta" class="text-sm text-gray-600 mb-4"></p>
+    <div id="biz-rating" class="mb-4"></div>
+
+    <section class="mb-6">
+      <h3 class="font-semibold mb-2">Reviews</h3>
+      <div id="reviews" class="space-y-4"></div>
+    </section>
+
+    <section>
+      <h3 class="font-semibold mb-2">Write a review</h3>
+      <form id="review-form" class="space-y-2">
+        <select id="review-rating" class="border p-2">
+          <option value="">Rating</option>
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5</option>
+        </select>
+        <textarea id="review-text" class="border p-2 w-full" placeholder="Your review"></textarea>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded" type="submit">Submit</button>
+        <p id="login-warning" class="text-sm text-red-600 hidden">Please login to write a review.</p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="text-center text-xs text-gray-500 p-4">&copy; 2024 BizRate</footer>
+  <script src="business.js"></script>
+</body>
+</html>
