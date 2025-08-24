@@ -40,7 +40,7 @@ async function loadTeachers() {
 
   teachers.forEach(t => {
     const div = document.createElement('div');
-    div.className = 'bg-white rounded-lg shadow p-6';
+    div.className = 'bg-white rounded-lg shadow p-6 transition transform hover:-translate-y-1 hover:shadow-lg animate__animated animate__fadeIn';
 
     const ratingHtml = t.averageRating !== null && t.averageRating !== undefined
       ? `<div class="flex items-center mb-4">
