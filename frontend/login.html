@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BizRate</title>
+  <title>Login</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
 </head>
 <body class="min-h-screen flex flex-col">
@@ -20,17 +20,17 @@
     </div>
   </header>
 
-  <main class="flex-1 max-w-5xl mx-auto p-4">
-    <form id="search-form" class="grid gap-2 md:grid-cols-3 mb-6">
-      <input id="search-name" class="border p-2" placeholder="Business name" />
-      <input id="search-category" class="border p-2" placeholder="Category" />
-      <input id="search-location" class="border p-2" placeholder="Location" />
-      <button class="md:col-span-3 bg-blue-600 text-white py-2 rounded" type="submit">Search</button>
+  <main class="flex-1 max-w-md mx-auto p-4">
+    <h2 class="text-xl font-semibold mb-4">Login</h2>
+    <form data-type="login" class="space-y-2">
+      <input id="email" type="email" required placeholder="Email" class="border p-2 w-full" />
+      <input id="password" type="password" required placeholder="Password" class="border p-2 w-full" />
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded">Login</button>
+      <p id="message" class="text-red-600 text-sm"></p>
     </form>
-    <div id="results" class="space-y-4"></div>
   </main>
 
   <footer class="text-center text-xs text-gray-500 p-4">&copy; 2024 BizRate</footer>
-  <script src="home.js"></script>
+  <script src="auth.js"></script>
 </body>
 </html>
