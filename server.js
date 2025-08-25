@@ -18,7 +18,7 @@ const sessions = new Map();
 
 // admin auth
 const adminSessions = new Set();
-const ADMIN = { username: 'admin', password: 'strawberry' };
+const ADMIN = { username: 'admin99', password: 'LaRive' };
 
 // ---- Helpers ---- //
 function averageFromReviews(reviews) {
