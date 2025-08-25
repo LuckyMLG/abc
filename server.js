@@ -192,6 +192,18 @@ app.post('/api/teachers/:id/reviews', requireAuth, (req, res) => {
     return res.status(400).json({ error: 'Rating must be 1-5' });
   }
 
+  // Enforce a one hour cooldown between reviews per user/teacher
+  const now = Date.now();
+  const oneHourAgo = now - 60 * 60 * 1000;
+  const recentReview = teacher.reviews.find(r =>
+    r.userId === req.userId && new Date(r.timestamp).getTime() > oneHourAgo
+  );
+  if (recentReview) {
+    return res
+      .status(429)
+      .json({ error: 'You can only submit one review per hour for this teacher' });
+  }
+
   const review = {
     userId: req.userId,
     rating,

@@ -9,12 +9,18 @@ async function searchTeachers(e) {
   container.innerHTML = '';
   data.results.forEach(t => {
     const div = document.createElement('div');
-    div.className = 'border border-green-700 p-4 rounded';
+    div.className = 'border border-green-700 p-4 rounded flex items-center space-x-4';
     const rating = t.averageRating ? t.averageRating.toFixed(1) : 'N/A';
+    const photo = t.photo
+      ? `<img src="${t.photo}" class="h-16 w-16 rounded-full object-cover" alt="${t.name}" />`
+      : `<div class="h-16 w-16 rounded-full bg-green-800"></div>`;
     div.innerHTML = `
-      <h3 class="text-lg font-semibold"><a href="/teacher.html?id=${t.id}" class="text-green-400 hover:text-green-200">${t.name}</a></h3>
-      <p class="text-sm">${t.subject} • ${t.school}</p>
-      <p class="text-sm">Rating: ${rating} (${t.reviewCount} reviews)</p>
+      ${photo}
+      <div>
+        <h3 class="text-lg font-semibold"><a href="/teacher.html?id=${t.id}" class="text-green-400 hover:text-green-200">${t.name}</a></h3>
+        <p class="text-sm">${t.subject} • ${t.school}</p>
+        <p class="text-sm">Rating: ${rating} (${t.reviewCount} reviews)</p>
+      </div>
     `;
     container.appendChild(div);
   });
