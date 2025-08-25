@@ -26,7 +26,7 @@
 
   <main class="flex-1 max-w-5xl mx-auto p-4">
     <h2 id="teacher-name" class="text-2xl font-bold mb-2"></h2>
-    <img id="teacher-photo" class="h-32 w-32 object-cover mb-2" src="" alt="Teacher photo" />
+    <img id="teacher-photo" class="h-32 w-32 object-cover mb-2 rounded-full border border-green-700" src="" alt="Teacher photo" />
     <p id="teacher-meta" class="text-sm mb-2"></p>
     <p id="teacher-description" class="mb-4"></p>
     <div id="teacher-rating" class="mb-4"></div>
@@ -50,6 +50,7 @@
         <textarea id="review-text" class="border border-green-700 bg-black p-2 w-full" placeholder="Your review"></textarea>
         <button class="bg-green-700 text-black px-4 py-2 rounded" type="submit">Submit</button>
         <p id="login-warning" class="text-sm text-red-500 hidden">Please login to write a review.</p>
+        <p id="review-error" class="text-sm text-red-500 hidden"></p>
       </form>
     </section>
   </main>
