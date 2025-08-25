@@ -9,27 +9,6 @@ app.use(express.json());
 const teachers = [];
 let nextTeacherId = 1;
 
-// Sample teachers for demo purposes
-teachers.push(
-  {
-    id: nextTeacherId++,
-    name: 'Jane Doe',
-    subject: 'Mathematics',
-    school: 'Springfield High',
-    description: '',
-    photo: '',
-    reviews: []
-  },
-  {
-    id: nextTeacherId++,
-    name: 'John Smith',
-    subject: 'History',
-    school: 'Shelbyville High',
-    description: '',
-    photo: '',
-    reviews: []
-  }
-);
 
 const users = [];
 let nextUserId = 1;
