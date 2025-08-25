@@ -2,24 +2,24 @@ function getToken() {
   return localStorage.getItem('token');
 }
 
-async function loadBusiness() {
+async function loadTeacher() {
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
   if (!id) return;
 
-  const res = await fetch(`/api/businesses/${id}`);
-  const biz = await res.json();
+  const res = await fetch(`/api/teachers/${id}`);
+  const teacher = await res.json();
 
-  document.getElementById('biz-name').textContent = biz.name;
-  document.getElementById('biz-meta').textContent = `${biz.category} • ${biz.location}`;
-  document.getElementById('biz-rating').textContent = biz.averageRating ? `${biz.averageRating.toFixed(1)} (${biz.reviewCount} reviews)` : 'No reviews yet';
+  document.getElementById('teacher-name').textContent = teacher.name;
+  document.getElementById('teacher-meta').textContent = `${teacher.subject} • ${teacher.school}`;
+  document.getElementById('teacher-rating').textContent = teacher.averageRating ? `${teacher.averageRating.toFixed(1)} (${teacher.reviewCount} reviews)` : 'No reviews yet';
 
   const container = document.getElementById('reviews');
   container.innerHTML = '';
-  biz.reviews.forEach(r => {
+  teacher.reviews.forEach(r => {
     const div = document.createElement('div');
     const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-    div.innerHTML = `<p class="text-sm">${stars} by ${r.reviewer}</p><p class="text-gray-700">${r.text}</p><p class="text-xs text-gray-400">${new Date(r.timestamp).toLocaleString()}</p>`;
+    div.innerHTML = `<p class="text-sm">${stars} by ${r.reviewer}</p><p class="text-green-200">${r.text}</p><p class="text-xs text-green-700">${new Date(r.timestamp).toLocaleString()}</p>`;
     container.appendChild(div);
   });
 
@@ -31,7 +31,7 @@ async function loadBusiness() {
       document.getElementById('login-warning').classList.remove('hidden');
       return;
     }
-    await fetch(`/api/businesses/${id}/reviews`, {
+    await fetch(`/api/teachers/${id}/reviews`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -41,8 +41,8 @@ async function loadBusiness() {
     });
     document.getElementById('review-rating').value = '';
     document.getElementById('review-text').value = '';
-    loadBusiness();
+    loadTeacher();
   });
 }
 
-document.addEventListener('DOMContentLoaded', loadBusiness);
+document.addEventListener('DOMContentLoaded', loadTeacher);

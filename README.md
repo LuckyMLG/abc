@@ -1,6 +1,6 @@
-# BizRate
+# TeachRate
 
-A lightweight site where users can search for businesses and share reviews.
+A lightweight site where users can search for teachers and share reviews in a retro terminal style.
 
 ## Setup
 1. Install dependencies:
@@ -14,8 +14,8 @@ A lightweight site where users can search for businesses and share reviews.
 3. Open your browser at [http://localhost:3000](http://localhost:3000).
 
 ## Features
-- Search businesses by name, category, or location.
-- View business profiles with average star rating and review count.
+- Search teachers by name, subject, or school.
+- View teacher profiles with average star rating and review count.
 - Create an account and submit 1–5 star reviews with text.
 - Visit the profile page to see your own reviews.
 

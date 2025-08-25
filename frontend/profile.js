@@ -11,8 +11,8 @@ async function loadReviews() {
   data.forEach(r => {
     const div = document.createElement('div');
     const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-    div.className = 'border p-4 rounded';
-    div.innerHTML = `<h3 class="font-semibold">${r.businessName}</h3><p class="text-sm">${stars}</p><p class="text-gray-700">${r.text}</p><p class="text-xs text-gray-400">${new Date(r.timestamp).toLocaleString()}</p>`;
+    div.className = 'border border-green-700 p-4 rounded';
+    div.innerHTML = `<h3 class="font-semibold">${r.teacherName}</h3><p class="text-sm">${stars}</p><p class="text-green-200">${r.text}</p><p class="text-xs text-green-700">${new Date(r.timestamp).toLocaleString()}</p>`;
     container.appendChild(div);
   });
 }
