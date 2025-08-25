@@ -9,16 +9,14 @@ app.use(express.json());
 const teachers = [];
 let nextTeacherId = 1;
 
-
-const users = [];
-let nextUserId = 1;
+// Preload admin account
+const users = [
+  { id: 1, username: 'admin99', password: 'LaRive', isAdmin: true }
+];
+let nextUserId = 2;
 
 // token -> userId
 const sessions = new Map();
-
-// admin auth
-const adminSessions = new Set();
-const ADMIN = { username: 'admin', password: 'strawberry' };
 
 // ---- Helpers ---- //
 function averageFromReviews(reviews) {
@@ -40,8 +38,12 @@ function requireAuth(req, res, next) {
 function requireAdmin(req, res, next) {
   const auth = req.headers.authorization || '';
   const [scheme, token] = auth.split(' ');
-  if (scheme === 'Bearer' && token && adminSessions.has(token)) {
-    return next();
+  if (scheme === 'Bearer' && token && sessions.has(token)) {
+    const user = users.find(u => u.id === sessions.get(token));
+    if (user && user.isAdmin) {
+      req.userId = user.id;
+      return next();
+    }
   }
   return res.status(401).json({ error: 'Admin auth required' });
 }
@@ -69,16 +71,6 @@ app.post('/api/login', (req, res) => {
   const token = crypto.randomBytes(16).toString('hex');
   sessions.set(token, user.id);
   res.json({ token });
-});
-
-app.post('/api/admin/login', (req, res) => {
-  const { username, password } = req.body || {};
-  if (username === ADMIN.username && password === ADMIN.password) {
-    const token = crypto.randomBytes(16).toString('hex');
-    adminSessions.add(token);
-    return res.json({ token });
-  }
-  return res.status(401).json({ error: 'Invalid credentials' });
 });
 
 app.get('/api/my-reviews', requireAuth, (req, res) => {
@@ -198,6 +190,17 @@ app.post('/api/teachers/:id/reviews', requireAuth, (req, res) => {
 });
 
 // ---- Static frontend ---- //
+app.get('/admin.html', (req, res) => {
+  const token = req.query.token || '';
+  if (sessions.has(token)) {
+    const user = users.find(u => u.id === sessions.get(token));
+    if (user && user.isAdmin) {
+      return res.sendFile(path.join(__dirname, 'frontend', 'admin.html'));
+    }
+  }
+  return res.status(401).send('Unauthorized');
+});
+
 app.use(express.static(path.join(__dirname, 'frontend')));
 
 const PORT = process.env.PORT || 3000;

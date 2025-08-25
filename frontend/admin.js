@@ -1,31 +1,9 @@
-function getAdminToken() {
-  return localStorage.getItem('adminToken');
-}
-
-function showUpload() {
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('upload').classList.remove('hidden');
-}
-
-async function adminLogin() {
-  const username = document.getElementById('admin-username').value.trim();
-  const password = document.getElementById('admin-password').value;
-  const res = await fetch('/api/admin/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
-  });
-  const data = await res.json();
-  if (data.token) {
-    localStorage.setItem('adminToken', data.token);
-    showUpload();
-  } else {
-    document.getElementById('login-message').textContent = data.error || 'Login failed';
-  }
+function getToken() {
+  return localStorage.getItem('token');
 }
 
 async function uploadTeacher() {
-  const token = getAdminToken();
+  const token = getToken();
   const name = document.getElementById('teacher-name').value.trim();
   const subject = document.getElementById('teacher-subject').value.trim();
   const school = document.getElementById('teacher-school').value.trim();
@@ -52,12 +30,11 @@ async function uploadTeacher() {
   }
 }
 
-function init() {
-  if (getAdminToken()) {
-    showUpload();
+document.addEventListener('DOMContentLoaded', () => {
+  const token = getToken();
+  if (!token) {
+    location.href = '/login.html';
+    return;
   }
-  document.getElementById('admin-login-btn').addEventListener('click', adminLogin);
   document.getElementById('upload-btn').addEventListener('click', uploadTeacher);
-}
-
-document.addEventListener('DOMContentLoaded', init);
+});
