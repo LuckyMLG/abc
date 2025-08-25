@@ -6,13 +6,13 @@ const app = express();
 app.use(express.json());
 
 // ---- In-memory data stores ---- //
-const businesses = [];
-let nextBusinessId = 1;
+const teachers = [];
+let nextTeacherId = 1;
 
-// Sample businesses for demo purposes
-businesses.push(
-  { id: nextBusinessId++, name: 'Coffee Spot', category: 'Cafe', location: 'New York', website: '', logo: '', reviews: [] },
-  { id: nextBusinessId++, name: 'Tech Guru', category: 'Electronics', location: 'San Francisco', website: '', logo: '', reviews: [] }
+// Sample teachers for demo purposes
+teachers.push(
+  { id: nextTeacherId++, name: 'Jane Doe', subject: 'Mathematics', school: 'Springfield High', website: '', logo: '', reviews: [] },
+  { id: nextTeacherId++, name: 'John Smith', subject: 'History', school: 'Shelbyville High', website: '', logo: '', reviews: [] }
 );
 
 const users = [];
@@ -65,13 +65,13 @@ app.post('/api/login', (req, res) => {
 
 app.get('/api/my-reviews', requireAuth, (req, res) => {
   const mine = [];
-  businesses.forEach(b => {
+  teachers.forEach(b => {
     b.reviews
       .filter(r => r.userId === req.userId)
       .forEach(r => {
         mine.push({
-          businessId: b.id,
-          businessName: b.name,
+          teacherId: b.id,
+          teacherName: b.name,
           rating: r.rating,
           text: r.text,
           timestamp: r.timestamp
@@ -81,14 +81,14 @@ app.get('/api/my-reviews', requireAuth, (req, res) => {
   res.json(mine);
 });
 
-// ---- Business Routes ---- //
-app.get('/api/businesses', (req, res) => {
-  const { search = '', category = '', location = '', page = 1, limit = 10 } = req.query;
+// ---- Teacher Routes ---- //
+app.get('/api/teachers', (req, res) => {
+  const { search = '', subject = '', school = '', page = 1, limit = 10 } = req.query;
 
-  let results = businesses.filter(b =>
+  let results = teachers.filter(b =>
     b.name.toLowerCase().includes(search.toLowerCase()) &&
-    (!category || b.category.toLowerCase().includes(category.toLowerCase())) &&
-    (!location || b.location.toLowerCase().includes(location.toLowerCase()))
+    (!subject || b.subject.toLowerCase().includes(subject.toLowerCase())) &&
+    (!school || b.school.toLowerCase().includes(school.toLowerCase()))
   );
 
   const start = (Number(page) - 1) * Number(limit);
@@ -97,8 +97,8 @@ app.get('/api/businesses', (req, res) => {
   const formatted = paged.map(b => ({
     id: b.id,
     name: b.name,
-    category: b.category,
-    location: b.location,
+    subject: b.subject,
+    school: b.school,
     averageRating: averageFromReviews(b.reviews),
     reviewCount: b.reviews.length,
     logo: b.logo || null
@@ -107,46 +107,46 @@ app.get('/api/businesses', (req, res) => {
   res.json({ results: formatted, total: results.length });
 });
 
-app.get('/api/businesses/:id', (req, res) => {
-  const business = businesses.find(b => b.id === Number(req.params.id));
-  if (!business) return res.status(404).json({ error: 'Business not found' });
-  const reviews = business.reviews.map(r => {
+app.get('/api/teachers/:id', (req, res) => {
+  const teacher = teachers.find(b => b.id === Number(req.params.id));
+  if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+  const reviews = teacher.reviews.map(r => {
     const user = users.find(u => u.id === r.userId);
     const reviewer = user ? user.email.split('@')[0] : 'Anonymous';
     return { rating: r.rating, text: r.text, timestamp: r.timestamp, reviewer };
   });
   res.json({
-    id: business.id,
-    name: business.name,
-    category: business.category,
-    location: business.location,
-    website: business.website,
-    logo: business.logo,
+    id: teacher.id,
+    name: teacher.name,
+    subject: teacher.subject,
+    school: teacher.school,
+    website: teacher.website,
+    logo: teacher.logo,
     reviews,
-    averageRating: averageFromReviews(business.reviews),
-    reviewCount: business.reviews.length
+    averageRating: averageFromReviews(teacher.reviews),
+    reviewCount: teacher.reviews.length
   });
 });
 
-app.post('/api/businesses', (req, res) => {
-  const { name, category = '', location = '', website = '', logo = '' } = req.body || {};
+app.post('/api/teachers', (req, res) => {
+  const { name, subject = '', school = '', website = '', logo = '' } = req.body || {};
   if (!name) return res.status(400).json({ error: 'Name is required' });
-  const business = {
-    id: nextBusinessId++,
+  const teacher = {
+    id: nextTeacherId++,
     name: name.trim(),
-    category: category.trim(),
-    location: location.trim(),
+    subject: subject.trim(),
+    school: school.trim(),
     website: website.trim(),
     logo: logo.trim(),
     reviews: []
   };
-  businesses.push(business);
-  res.status(201).json(business);
+  teachers.push(teacher);
+  res.status(201).json(teacher);
 });
 
-app.post('/api/businesses/:id/reviews', requireAuth, (req, res) => {
-  const business = businesses.find(b => b.id === Number(req.params.id));
-  if (!business) return res.status(404).json({ error: 'Business not found' });
+app.post('/api/teachers/:id/reviews', requireAuth, (req, res) => {
+  const teacher = teachers.find(b => b.id === Number(req.params.id));
+  if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
 
   const { rating, text = '' } = req.body || {};
   if (typeof rating !== 'number' || rating < 1 || rating > 5) {
@@ -159,11 +159,11 @@ app.post('/api/businesses/:id/reviews', requireAuth, (req, res) => {
     text: String(text).trim(),
     timestamp: new Date().toISOString()
   };
-  business.reviews.push(review);
+  teacher.reviews.push(review);
   res.status(201).json({
-    ...business,
-    averageRating: averageFromReviews(business.reviews),
-    reviewCount: business.reviews.length
+    ...teacher,
+    averageRating: averageFromReviews(teacher.reviews),
+    reviewCount: teacher.reviews.length
   });
 });
 
