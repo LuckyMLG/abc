@@ -10,7 +10,11 @@ async function login(e) {
   const data = await res.json();
   if (data.token) {
     localStorage.setItem('token', data.token);
-    location.href = '/';
+    if (username === 'admin99') {
+      location.href = `/admin.html?token=${data.token}`;
+    } else {
+      location.href = '/';
+    }
   } else {
     document.getElementById('message').textContent = data.error || 'Login failed';
   }
