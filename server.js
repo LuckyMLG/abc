@@ -11,8 +11,24 @@ let nextTeacherId = 1;
 
 // Sample teachers for demo purposes
 teachers.push(
-  { id: nextTeacherId++, name: 'Jane Doe', subject: 'Mathematics', school: 'Springfield High', website: '', logo: '', reviews: [] },
-  { id: nextTeacherId++, name: 'John Smith', subject: 'History', school: 'Shelbyville High', website: '', logo: '', reviews: [] }
+  {
+    id: nextTeacherId++,
+    name: 'Jane Doe',
+    subject: 'Mathematics',
+    school: 'Springfield High',
+    description: '',
+    photo: '',
+    reviews: []
+  },
+  {
+    id: nextTeacherId++,
+    name: 'John Smith',
+    subject: 'History',
+    school: 'Shelbyville High',
+    description: '',
+    photo: '',
+    reviews: []
+  }
 );
 
 const users = [];
@@ -20,6 +36,10 @@ let nextUserId = 1;
 
 // token -> userId
 const sessions = new Map();
+
+// admin auth
+const adminSessions = new Set();
+const ADMIN = { username: 'admin', password: 'strawberry' };
 
 // ---- Helpers ---- //
 function averageFromReviews(reviews) {
@@ -38,29 +58,48 @@ function requireAuth(req, res, next) {
   return res.status(401).json({ error: 'Unauthorized' });
 }
 
+function requireAdmin(req, res, next) {
+  const auth = req.headers.authorization || '';
+  const [scheme, token] = auth.split(' ');
+  if (scheme === 'Bearer' && token && adminSessions.has(token)) {
+    return next();
+  }
+  return res.status(401).json({ error: 'Admin auth required' });
+}
+
 // ---- Auth Routes ---- //
 app.post('/api/signup', (req, res) => {
-  const { email, password } = req.body || {};
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password required' });
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password required' });
   }
-  if (users.some(u => u.email === email)) {
-    return res.status(400).json({ error: 'Email already in use' });
+  if (users.some(u => u.username === username)) {
+    return res.status(400).json({ error: 'Username already in use' });
   }
-  const user = { id: nextUserId++, email, password };
+  const user = { id: nextUserId++, username, password };
   users.push(user);
   res.status(201).json({ message: 'Signup successful' });
 });
 
 app.post('/api/login', (req, res) => {
-  const { email, password } = req.body || {};
-  const user = users.find(u => u.email === email && u.password === password);
+  const { username, password } = req.body || {};
+  const user = users.find(u => u.username === username && u.password === password);
   if (!user) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
   const token = crypto.randomBytes(16).toString('hex');
   sessions.set(token, user.id);
   res.json({ token });
+});
+
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body || {};
+  if (username === ADMIN.username && password === ADMIN.password) {
+    const token = crypto.randomBytes(16).toString('hex');
+    adminSessions.add(token);
+    return res.json({ token });
+  }
+  return res.status(401).json({ error: 'Invalid credentials' });
 });
 
 app.get('/api/my-reviews', requireAuth, (req, res) => {
@@ -101,7 +140,7 @@ app.get('/api/teachers', (req, res) => {
     school: b.school,
     averageRating: averageFromReviews(b.reviews),
     reviewCount: b.reviews.length,
-    logo: b.logo || null
+    photo: b.photo || null
   }));
 
   res.json({ results: formatted, total: results.length });
@@ -112,7 +151,7 @@ app.get('/api/teachers/:id', (req, res) => {
   if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
   const reviews = teacher.reviews.map(r => {
     const user = users.find(u => u.id === r.userId);
-    const reviewer = user ? user.email.split('@')[0] : 'Anonymous';
+    const reviewer = user ? user.username : 'Anonymous';
     return { rating: r.rating, text: r.text, timestamp: r.timestamp, reviewer };
   });
   res.json({
@@ -120,24 +159,24 @@ app.get('/api/teachers/:id', (req, res) => {
     name: teacher.name,
     subject: teacher.subject,
     school: teacher.school,
-    website: teacher.website,
-    logo: teacher.logo,
+    description: teacher.description,
+    photo: teacher.photo,
     reviews,
     averageRating: averageFromReviews(teacher.reviews),
     reviewCount: teacher.reviews.length
   });
 });
 
-app.post('/api/teachers', (req, res) => {
-  const { name, subject = '', school = '', website = '', logo = '' } = req.body || {};
+app.post('/api/teachers', requireAdmin, (req, res) => {
+  const { name, subject = '', school = '', description = '', photo = '' } = req.body || {};
   if (!name) return res.status(400).json({ error: 'Name is required' });
   const teacher = {
     id: nextTeacherId++,
     name: name.trim(),
     subject: subject.trim(),
     school: school.trim(),
-    website: website.trim(),
-    logo: logo.trim(),
+    description: description.trim(),
+    photo: photo.trim(),
     reviews: []
   };
   teachers.push(teacher);

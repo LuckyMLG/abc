@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-black text-green-500 font-mono">
+  <header class="border-b border-green-700">
+    <div class="max-w-5xl mx-auto p-4 flex justify-between items-center">
+      <a href="/" class="flex items-center space-x-2">
+        <img src="https://sdmntpritalynorth.oaiusercontent.com/files/00000000-2cec-6246-a14d-2bbada513d32/raw?se=2025-08-25T10%3A49%3A51Z&sp=r&sv=2024-08-04&sr=b&scid=21ac6ef1-20f1-52f0-b74d-5d748b88bdc2&skoid=eb780365-537d-4279-a878-cae64e33aa9c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-25T07%3A54%3A56Z&ske=2025-08-26T07%3A54%3A56Z&sks=b&skv=2024-08-04&sig=axd0JudmxfbZ82P97LOF9zDuiIg4/eDF4TkMd0f%2BkH4%3D" alt="TeachRate logo" class="h-8 w-8">
+        <span class="text-2xl font-bold">TeachRate</span>
+      </a>
+    </div>
+  </header>
+  <main class="flex-1 max-w-md mx-auto p-4">
+    <div id="login" class="space-y-2">
+      <h2 class="text-xl font-semibold mb-2">Admin Login</h2>
+      <input id="admin-username" class="border border-green-700 bg-black p-2 w-full" placeholder="Username" />
+      <input id="admin-password" type="password" class="border border-green-700 bg-black p-2 w-full" placeholder="Password" />
+      <button id="admin-login-btn" class="w-full bg-green-700 text-black py-2 rounded">Login</button>
+      <p id="login-message" class="text-red-500 text-sm"></p>
+    </div>
+    <div id="upload" class="space-y-2 hidden">
+      <h2 class="text-xl font-semibold mb-2">Add Teacher</h2>
+      <input id="teacher-name" class="border border-green-700 bg-black p-2 w-full" placeholder="Name" />
+      <input id="teacher-subject" class="border border-green-700 bg-black p-2 w-full" placeholder="Subject" />
+      <input id="teacher-school" class="border border-green-700 bg-black p-2 w-full" placeholder="School" />
+      <input id="teacher-photo" class="border border-green-700 bg-black p-2 w-full" placeholder="Photo URL" />
+      <textarea id="teacher-description" class="border border-green-700 bg-black p-2 w-full" placeholder="Description"></textarea>
+      <button id="upload-btn" class="w-full bg-green-700 text-black py-2 rounded">Upload</button>
+      <p id="upload-message" class="text-green-500 text-sm"></p>
+    </div>
+  </main>
+  <footer class="text-center text-xs text-green-700 p-4">&copy; 2024 TeachRate</footer>
+  <script src="admin.js"></script>
+</body>
+</html>
