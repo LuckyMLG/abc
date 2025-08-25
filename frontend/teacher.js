@@ -12,6 +12,14 @@ async function loadTeacher() {
 
   document.getElementById('teacher-name').textContent = teacher.name;
   document.getElementById('teacher-meta').textContent = `${teacher.subject} • ${teacher.school}`;
+  document.getElementById('teacher-description').textContent = teacher.description || '';
+  const photoEl = document.getElementById('teacher-photo');
+  if (teacher.photo) {
+    photoEl.src = teacher.photo;
+    photoEl.classList.remove('hidden');
+  } else {
+    photoEl.classList.add('hidden');
+  }
   document.getElementById('teacher-rating').textContent = teacher.averageRating ? `${teacher.averageRating.toFixed(1)} (${teacher.reviewCount} reviews)` : 'No reviews yet';
 
   const container = document.getElementById('reviews');

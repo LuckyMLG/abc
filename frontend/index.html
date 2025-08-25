@@ -17,6 +17,7 @@
         <a href="/" class="hover:text-green-200">Home</a>
         <a href="#" class="hover:text-green-200">Subjects</a>
         <a href="/profile.html" class="hover:text-green-200">Write a review</a>
+        <a href="/admin.html" class="hover:text-green-200">Admin</a>
         <a href="/login.html" class="hover:text-green-200">Login</a>
         <a href="/signup.html" class="hover:text-green-200">Signup</a>
       </nav>
@@ -24,11 +25,9 @@
   </header>
 
   <main class="flex-1 max-w-5xl mx-auto p-4">
-    <form id="search-form" class="grid gap-2 md:grid-cols-3 mb-6">
+    <form id="search-form" class="grid gap-2 md:grid-cols-1 mb-6">
       <input id="search-name" class="border border-green-700 bg-black p-2" placeholder="Teacher name" />
-      <input id="search-subject" class="border border-green-700 bg-black p-2" placeholder="Subject" />
-      <input id="search-school" class="border border-green-700 bg-black p-2" placeholder="School" />
-      <button class="md:col-span-3 bg-green-700 text-black py-2 rounded" type="submit">Search</button>
+      <button class="bg-green-700 text-black py-2 rounded" type="submit">Search</button>
     </form>
     <div id="results" class="space-y-4"></div>
   </main>

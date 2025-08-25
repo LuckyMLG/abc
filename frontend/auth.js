@@ -1,11 +1,11 @@
 async function login(e) {
   e.preventDefault();
-  const email = document.getElementById('email').value.trim();
+  const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   const res = await fetch('/api/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ username, password })
   });
   const data = await res.json();
   if (data.token) {
@@ -18,12 +18,12 @@ async function login(e) {
 
 async function signup(e) {
   e.preventDefault();
-  const email = document.getElementById('email').value.trim();
+  const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   const res = await fetch('/api/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ username, password })
   });
   const data = await res.json();
   if (res.ok) {

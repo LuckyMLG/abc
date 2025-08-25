@@ -1,12 +1,8 @@
 async function searchTeachers(e) {
   if (e) e.preventDefault();
   const name = document.getElementById('search-name').value.trim();
-  const subject = document.getElementById('search-subject').value.trim();
-  const school = document.getElementById('search-school').value.trim();
   const params = new URLSearchParams();
   if (name) params.append('search', name);
-  if (subject) params.append('subject', subject);
-  if (school) params.append('school', school);
   const res = await fetch('/api/teachers?' + params.toString());
   const data = await res.json();
   const container = document.getElementById('results');
